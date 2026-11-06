@@ -18,8 +18,8 @@ public class GameManager : MonoBehaviour
     public void AddScore(int amount) { score += amount; UpdateUI(); if (score >= targetScore) Win(); }
     public void UpdateUI()
     {
+        livesText.text = $"Lives: {lives}";
         scoreText.text = $"Score: {score} / {targetScore}";
-        livesText.text = $"Lives: {lives}   Health: {Mathf.Max(player.Current, 0)} / {player.Max}";
     }
     public void PlayerDied() { lives--; UpdateUI(); if (lives <= 0) Lose(); else StartCoroutine(Respawn()); }
     IEnumerator Respawn()
@@ -33,3 +33,4 @@ public class GameManager : MonoBehaviour
     void Lose() { losePanel.SetActive(true); Time.timeScale = 0f; }
     public void Restart() { Time.timeScale = 1f; SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); }
 }
+//livesText.text = $"Lives: {lives}  Health: {Mathf.Max(player.Current, 0)} / {player.Max}";

@@ -21,8 +21,10 @@ public class Hazard : MonoBehaviour
             yield return new WaitForSeconds(strikeTime);
         }
     }
+
     void OnTriggerStay(Collider other)
     {
+        Debug.Log("hit " + other.name);
         if (!other.TryGetComponent(out Health health) || !health.TakeDamage(damage)) return;
         Rigidbody body = other.attachedRigidbody;
         if (body == null) return;

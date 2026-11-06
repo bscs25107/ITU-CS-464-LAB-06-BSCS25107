@@ -1,22 +1,45 @@
+using System.Collections;
 using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
     [SerializeField] GameObject coinPrefab;
-    [SerializeField] Transform player;
-    [SerializeField] float interval = 1.5f;
-    [SerializeField] int maxCoins = 5;
-    [SerializeField] float area = 7f;
+    [SerializeField] Renderer floor;
+    [SerializeField] int count = 10;
+    [SerializeField] float margin = 3f;
+    [SerializeField] float height = 1.5f;
+    [SerializeField] float clearRadius = 1.5f;
+    [SerializeField] float spawnInterval = 1.0f; // Time in seconds between spawns
 
-    void Start() => InvokeRepeating(nameof(SpawnCoin), 1f, interval);
-
-    void SpawnCoin()
+    void Start()
     {
-        if (transform.childCount >= maxCoins) return;
-        float x = Random.Range(-area, area);
-        float z = Random.Range(-area, area);
-        Vector3 pos = new Vector3(x, 0.5f, z);
-        if (Vector3.Distance(pos, player.position) < 2f) return;
-        Instantiate(coinPrefab, pos, Quaternion.identity, transform);
+        StartCoroutine(SpawnCoinsRoutine());
+    }
+
+    IEnumerator SpawnCoinsRoutine()
+    {
+        Bounds b = floor.bounds;
+        int placed = 0, tries = 0;
+
+        while (placed < count && tries < 500)
+        {
+            tries++;
+            float x = Random.Range(b.min.x + margin, b.max.x - margin);
+            float z = Random.Range(b.min.z + margin, b.max.z - margin);
+
+            Vector3 probe = new Vector3(x, b.max.y + clearRadius + 0.05f, z);
+            if (Physics.CheckSphere(probe, clearRadius, ~0, QueryTriggerInteraction.Collide))
+                continue;
+
+            Vector3 at = new Vector3(x, b.max.y + height, z);
+            Instantiate(coinPrefab, at, coinPrefab.transform.rotation);
+            placed++;
+
+            // Wait before spawning the next coin
+            yield return new WaitForSeconds(spawnInterval);
+        }
+
+        if (placed < count)
+            Debug.LogWarning($"CoinSpawner placed only {placed}/{count}");
     }
 }
